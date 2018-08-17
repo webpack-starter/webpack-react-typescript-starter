@@ -1,0 +1,12 @@
+html, body, :global(#root) {
+  height: 100%;
+}
+
+.main {
+  color: red;
+  font-size: 20px;
+  .info{
+    color: blue;
+  }
+}
+
