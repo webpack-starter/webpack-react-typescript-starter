@@ -30,7 +30,10 @@ const bableLoader = {
 };
 
 module.exports = function (err, webpackConfig) {
-  console.log('err:', err);
+  if (err) {
+    console.log('err:', err);
+    return;
+  }
   const prod = webpackConfig.mode === 'production';
   return {
     entry: './src/index.tsx',
@@ -48,7 +51,11 @@ module.exports = function (err, webpackConfig) {
     },
     resolve: {
       alias: {
-        components: './src/components',
+        '@': path.resolve('src'),
+        components: path.resolve('src', 'components'),
+        containers: path.resolve('src', 'containers'),
+        utils: path.resolve('src', 'utils'),
+        config: path.resolve('src', 'utils', 'config'),
       },
       extensions: ['.ts', '.tsx', '.js'],
       modules: [path.resolve(__dirname, 'node_modules')],
@@ -75,19 +82,35 @@ module.exports = function (err, webpackConfig) {
           include: path.resolve(__dirname, 'src'),
         },
         {
-          test: /\.css$/,
+          test: [
+            /\.css$/,
+            /\.less$/,
+          ],
           exclude: /node_modules/,
           use: [
-            MiniCssExtractPlugin.loader,
+            // MiniCssExtractPlugin.loader,
+            {
+              loader: 'style-loader',
+              options: {
+                singleton: true,
+              }
+            },
             {
               loader: 'css-loader',
               options: {
-                modules: true, // 开启css-modules功能
-                localIdentName: '[name]__[local]-[hash:base64:5]'
+                modules: true, // css支持css-modules模块功能
+                ocalIdentName: '[name]__[local]-[hash:base64:5]',
               }
             },
             {
               loader: 'postcss-loader',
+              options: {
+                plugins: [
+                  require('postcss-preset-env')(),
+                  require('precss')(),
+                  require('postcss-cssnext')(),
+                ]
+              }
             },
           ],
         }
@@ -102,10 +125,10 @@ module.exports = function (err, webpackConfig) {
         filename: 'index.html',
         template: './entry.ejs',
       }),
-      new MiniCssExtractPlugin({
-        filename: '[name].css',
-        chunkFilname: '[id].css',
-      })
+      // new MiniCssExtractPlugin({
+      //   filename: '[name].css',
+      //   chunkFilname: '[id].css',
+      // })
     ]
   }
 }
